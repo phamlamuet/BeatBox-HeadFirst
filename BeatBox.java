@@ -51,6 +51,14 @@ public class BeatBox {
         downTempo.addActionListener(new MyDownTempoListener());
         buttonBox.add(downTempo);
 
+        JButton removeAll=new JButton("RemoveAll");
+        removeAll.addActionListener(new RemoveAll());
+        buttonBox.add(removeAll);
+
+        JButton godMode=new JButton("GodMode");
+        godMode.addActionListener(new GodMode());
+        buttonBox.add(godMode);
+
         Box nameBox = new Box(BoxLayout.Y_AXIS);
         for (int i = 0; i < 16; i++) {
             nameBox.add(new Label(instrumentNames[i]));
@@ -154,6 +162,23 @@ public class BeatBox {
         public void actionPerformed(ActionEvent e) {
             float tempoFactor = sequencer.getTempoFactor();
             sequencer.setTempoFactor((float) (tempoFactor * 0.97f));
+        }
+    }
+    public class RemoveAll implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            for (JCheckBox checkBox:checkboxList){
+                checkBox.setSelected(false);
+            }
+
+        }
+    }
+    public class GodMode implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            for(JCheckBox checkBox:checkboxList){
+                checkBox.setSelected(true);
+            }
         }
     }
 
