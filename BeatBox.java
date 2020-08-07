@@ -17,7 +17,7 @@ public class BeatBox {
     JFrame theFrame;
 
     String[] instrumentNames = {"Bass Drum", "Closed Hi-Hat", "Open Hi-Hat", "Acoustic Snare",
-            "Crash Cynbal", "Hand Clap", "High Tom", "Hi Bongo", "Maracas", "Whitsle", "Low Conga", "CowBell",
+            "Crash Cymbal", "Hand Clap", "High Tom", "Hi Bongo", "Maracas", "Whitsle", "Low Conga", "Cowbell",
             "Vibraslap", "Low-mid Tom", "High Agogo", "Open Hi Conga"
     };
     int[] instruments = {35, 42, 46, 38, 49, 39, 50, 60, 70, 72, 64, 56, 58, 47, 67, 63};
