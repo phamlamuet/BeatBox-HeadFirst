@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
 import java.util.ArrayList;
 
 public class BeatBox {
@@ -51,13 +52,21 @@ public class BeatBox {
         downTempo.addActionListener(new MyDownTempoListener());
         buttonBox.add(downTempo);
 
-        JButton removeAll=new JButton("RemoveAll");
+        JButton removeAll = new JButton("Remove All");
         removeAll.addActionListener(new RemoveAll());
         buttonBox.add(removeAll);
 
-        JButton godMode=new JButton("GodMode");
-        godMode.addActionListener(new GodMode());
-        buttonBox.add(godMode);
+        JButton tickAll = new JButton("Tick All");
+        tickAll.addActionListener(new TickAll());
+        buttonBox.add(tickAll);
+
+        JButton save = new JButton("Save");
+        save.addActionListener(new MySendListener());
+        buttonBox.add(save);
+
+        JButton restore = new JButton("Restore");
+        restore.addActionListener(new MyReadInListener());
+        buttonBox.add(restore);
 
         Box nameBox = new Box(BoxLayout.Y_AXIS);
         for (int i = 0; i < 16; i++) {
@@ -100,7 +109,7 @@ public class BeatBox {
     }
 
     public void buildTrackAndStart() {
-        int[] trackList = null; //We'll make a 16-element arry to hold the values for one instrument,
+        int[] trackList; //We'll make a 16-element arry to hold the values for one instrument,
         //across all 16 beats
         sequence.deleteTrack(track);//get rid of old track
         track = sequence.createTrack();//make a fresh one
@@ -112,7 +121,7 @@ public class BeatBox {
 
             for (int j = 0; j < 16; j++) {  //Do this for each of beat in this row
 
-                JCheckBox jc = (JCheckBox) checkboxList.get(j + (16 * i));
+                JCheckBox jc = checkboxList.get(j + (16 * i));
 
                 if (jc.isSelected()) {//if checkbox at this beat selected?If yes,put the key value
                     trackList[j] = key;//in this slot in the array(the slot that represents this beat
@@ -153,7 +162,7 @@ public class BeatBox {
         @Override
         public void actionPerformed(ActionEvent e) {
             float tempoFactor = sequencer.getTempoFactor();
-            sequencer.setTempoFactor((float) tempoFactor * 1.03f);
+            sequencer.setTempoFactor( tempoFactor * 1.03f);
         }
     }
 
@@ -161,24 +170,70 @@ public class BeatBox {
         @Override
         public void actionPerformed(ActionEvent e) {
             float tempoFactor = sequencer.getTempoFactor();
-            sequencer.setTempoFactor((float) (tempoFactor * 0.97f));
+            sequencer.setTempoFactor( (tempoFactor * 0.97f));
         }
     }
-    public class RemoveAll implements ActionListener{
+
+    public class RemoveAll implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            for (JCheckBox checkBox:checkboxList){
+            for (JCheckBox checkBox : checkboxList) {
                 checkBox.setSelected(false);
             }
 
         }
     }
-    public class GodMode implements ActionListener{
+
+    public class TickAll implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            for(JCheckBox checkBox:checkboxList){
+            for (JCheckBox checkBox : checkboxList) {
                 checkBox.setSelected(true);
             }
+        }
+    }
+
+    public class MySendListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            boolean[] checkboxState = new boolean[256];
+            for (int i = 0; i < 256; i++) {
+                JCheckBox check = checkboxList.get(i);
+                if (check.isSelected()) {
+                    checkboxState[i] = true;
+                }
+            }
+            try {
+                FileOutputStream fileOutputStream = new FileOutputStream(new File("Checkbox.txt"));
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(checkboxState);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public class MyReadInListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            boolean[] checkboxState = null;
+            try {
+                FileInputStream fileInputStream = new FileInputStream(new File("Checkbox.txt"));
+                ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+                checkboxState = (boolean[]) objectInputStream.readObject();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            for (int i = 0; i < 256; i++) {
+                JCheckBox check =  checkboxList.get(i);
+                if (checkboxState[i]) {
+                    check.setSelected(true);
+                } else {
+                    check.setSelected(false);
+                }
+            }
+            sequencer.stop();
+            buildTrackAndStart();
         }
     }
 
@@ -187,8 +242,8 @@ public class BeatBox {
             int key = list[i];
 
             if (key != 0) {
-                track.add(makeEvent(144,9,key,100,i));
-                track.add(makeEvent(128,9,key,100,i+1));
+                track.add(makeEvent(144, 9, key, 100, i));
+                track.add(makeEvent(128, 9, key, 100, i + 1));
             }
         }
     }
@@ -196,12 +251,11 @@ public class BeatBox {
     public MidiEvent makeEvent(int comd, int chan, int one, int two, int tick) {
         MidiEvent event = null;
         try {
-            ShortMessage a=new ShortMessage();
-            a.setMessage(comd,chan,one,two);
-            event=new MidiEvent(a,tick);
+            ShortMessage a = new ShortMessage();
+            a.setMessage(comd, chan, one, two);
+            event = new MidiEvent(a, tick);
 
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return event;
